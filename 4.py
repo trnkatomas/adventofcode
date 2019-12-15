@@ -88,3 +88,9 @@ for d in dataset:
     res, res2 = verify_number(start_whole, end_whole)
     print(res.numpy())
     print(res2.numpy())
+
+# OMG bash solution from some redit post
+# part 1
+# seq 171309 643603 | grep -P '^(?=1*2*3*4*5*6*7*8*9*$).*(\d)\1' | wc -l
+# part 2
+# seq 171309 643603 | grep -P '^(?=1*2*3*4*5*6*7*8*9*$).*(\d)(?<!(?=\1)..)\1(?!\1)' | wc -l

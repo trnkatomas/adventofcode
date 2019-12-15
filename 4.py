@@ -49,11 +49,16 @@ def two_same(number):
                             1, "VALID"))
     return tf.reduce_any(tf.math.equal(number[:-1], proc))
 
+@tf.function
+def exactly_two_same(number):
+    y, idx, cnts = tf.unique_with_counts(number)
+    return tf.reduce_any(cnts==2)
 
 @tf.function
 def verify_number(num, end):
     radixes = tf.map_fn(lambda x: tf.math.pow(10.0, x), tf.cast(tf.range(num.shape[0]-1, -1, delta=-1), tf.float32))
-    valid_numbers = 0
+    valid_numbers_part_1 = 0
+    valid_numbers_part_2 = 0
     while tf.tensordot(num, radixes, 1) < tf.tensordot(end, radixes, 1):
         decr = tf.math.is_non_decreasing(num)
         if not decr:
@@ -63,10 +68,15 @@ def verify_number(num, end):
         if not two_same_numbers:
             num = add_vector(num)
             continue
-        valid_numbers += 1
+        valid_numbers_part_1 += 1
+        ex_two_same = exactly_two_same(num)
+        if not ex_two_same:
+            num = add_vector(num)
+            continue
+        valid_numbers_part_2 += 1
         #print(tf.tensordot(num, radixes, 1))
         num = add_vector(num)
-    return valid_numbers    
+    return valid_numbers_part_1, valid_numbers_part_2    
 
 for d in dataset:
     start = d[0]
@@ -75,5 +85,6 @@ for d in dataset:
     start_whole = tf.strings.to_number(start, out_type=tf.float32)
     end_whole = tf.strings.to_number(end, out_type=tf.float32)
     #print(start_whole)
-    res = verify_number(start_whole, end_whole)
+    res, res2 = verify_number(start_whole, end_whole)
     print(res.numpy())
+    print(res2.numpy())
